@@ -7,6 +7,7 @@ PLEX_BIF_FRAME_INTERVAL = 5
 THUMBNAIL_QUALITY = 4 # Allowed range is 2 - 6, with 2 being the highest quality and largest file size and 6 being the lowest quality and smallest file size. # 
 PLEX_LOCAL_MEDIA_PATH = '/path_to/plex/Library/Application Support/Plex Media Server/Media'
 TMP_FOLDER = '/dev/shm/plex_generate_previews'
+GPU_TYPE = 'nvidia'  # Options: 'nvidia', 'intel'
 
 # If you have a large library, you might need to increase the below timeout (seconds) when sending requests to plex. 
 PLEX_TIMEOUT=60
@@ -113,8 +114,12 @@ def generate_images(video_file_param, output_folder, lock):
             gpu_ffmpeg = [c for c in gpu.processes if c["command"].lower().startswith("ffmpeg")]
             if len(gpu_ffmpeg) < GPU_THREADS or CPU_THREADS == 0:
                 hw = True
-                args.insert(5, "-hwaccel")
-                args.insert(6, "cuda")
+                if GPU_TYPE == 'nvidia':
+                    args.insert(5, "-hwaccel")
+                    args.insert(6, "cuda")
+                elif GPU_TYPE == 'intel':
+                    args.insert(5, "-hwaccel")
+                    args.insert(6, "qsv")
 
     proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
